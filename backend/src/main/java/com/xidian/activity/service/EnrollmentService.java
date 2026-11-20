@@ -33,8 +33,9 @@ public class EnrollmentService {
     /**
      * 参与人报名：
      * 1. 信息格式校验（姓名/手机号/学院）
-     * 2. 事务内锁定活动行，核验活动有效性与名额
-     * 3. (activity_id, phone) 唯一约束兜底防重复报名
+     * 2. 事务内锁定活动行，核验活动有效性
+     * 3. 同一活动下姓名或手机号任一重复即拒绝
+     * 4. 核验名额，写入报名；唯一约束兜底防并发重复
      */
     @Transactional(rollbackFor = Exception.class)
     public void signup(long activityId, EnrollmentRequest req) {
@@ -64,12 +65,19 @@ public class EnrollmentService {
         if (college == null || !Boolean.TRUE.equals(college.getEnabled())) {
             throw new BusinessException(ErrorCode.SIGNUP_COLLEGE_INVALID);
         }
+
+        // ---- 4. 重复报名预检：同一活动下姓名或手机号相同即拒绝 ----
+        // 活动行锁已持有，同一活动的并发报名在此串行化，读到的是最新已提交数据
+        if (enrollmentMapper.countDuplicate(activityId, name, phone) > 0) {
+            throw new BusinessException(ErrorCode.SIGNUP_DUPLICATE);
+        }
+
         long enrolled = enrollmentMapper.countForUpdate(activityId); // SELECT COUNT(*) ... FOR SHARE 当前读
         if (enrolled >= activity.getCapacity()) {
             throw new BusinessException(ErrorCode.SIGNUP_FULL); // 满额不改变生命周期状态
         }
 
-        // ---- 4. 写入报名（唯一约束兜底防重复） ----
+        // ---- 5. 写入报名（唯一约束兜底防重复） ----
         Enrollment enrollment = new Enrollment();
         enrollment.setActivityId(activityId);
         enrollment.setName(name);
@@ -78,7 +86,7 @@ public class EnrollmentService {
         try {
             enrollmentMapper.insert(enrollment);
         } catch (DuplicateKeyException e) {
-            // (activity_id, phone) 命中唯一约束 → 重复报名
+            // 命中 (activity_id, name) 或 (activity_id, phone) 唯一约束 → 重复报名
             throw new BusinessException(ErrorCode.SIGNUP_DUPLICATE);
         }
         log.info("报名成功: activityId={}, phone={}", activityId, maskPhone(phone));

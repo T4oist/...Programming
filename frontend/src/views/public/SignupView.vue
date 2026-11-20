@@ -10,6 +10,9 @@
     <div class="promo-card" v-else>
       <h2 style="margin-top: 0">活动报名</h2>
       <p class="promo-meta">{{ activity.title }} · 截止 {{ activity.signupDeadline }}</p>
+      <p v-if="!success" style="margin: 0 0 16px; color: #909399; font-size: 13px">
+        同一姓名或手机号在同一活动中只能报名一次。
+      </p>
 
       <el-result v-if="success" icon="success" title="报名成功">
         <template #extra>

@@ -30,7 +30,7 @@ public enum ErrorCode {
     // 报名 43xxx
     SIGNUP_NOT_AVAILABLE(43001, 400, "活动未发布或已删除，暂不可报名"),
     SIGNUP_ENDED(43002, 400, "报名已结束，感谢关注"),
-    SIGNUP_DUPLICATE(43003, 400, "该手机号已报名，请勿重复提交"),
+    SIGNUP_DUPLICATE(43003, 400, "该姓名或手机号已报名，请勿重复提交"),
     SIGNUP_FULL(43004, 400, "报名人数已满"),
     SIGNUP_NAME_INVALID(43005, 400, "姓名须为2~20个字符"),
     SIGNUP_PHONE_INVALID(43006, 400, "手机号格式不正确"),

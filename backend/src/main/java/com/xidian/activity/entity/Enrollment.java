@@ -7,7 +7,7 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-/** 报名表：(activityId, phone) 数据库唯一约束防重复报名 */
+/** 报名表：同一活动下姓名或手机号不可重复，(activity_id, name)/(activity_id, phone) 唯一约束兜底 */
 @Data
 @TableName("enrollment")
 public class Enrollment {

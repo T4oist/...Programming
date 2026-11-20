@@ -79,7 +79,8 @@ CREATE TABLE activity (
 
 -- -------------------------------------------------------------
 -- 4. 报名表 enrollment：一条记录代表一名参与人对一个活动的报名
---    (activity_id, phone) 唯一约束在数据库层杜绝重复报名
+--    同一活动下「姓名相同」或「手机号相同」均视为重复报名，
+--    由 (activity_id, name) 与 (activity_id, phone) 两个唯一约束兜底
 -- -------------------------------------------------------------
 CREATE TABLE enrollment (
     id          BIGINT      NOT NULL AUTO_INCREMENT COMMENT '报名编号',
@@ -90,9 +91,10 @@ CREATE TABLE enrollment (
     created_at  DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '报名时间',
     PRIMARY KEY (id),
     UNIQUE KEY uk_enrollment_activity_phone (activity_id, phone),
+    UNIQUE KEY uk_enrollment_activity_name  (activity_id, name),
     CONSTRAINT fk_enrollment_activity FOREIGN KEY (activity_id) REFERENCES activity (id),
     CONSTRAINT fk_enrollment_college  FOREIGN KEY (college_id)  REFERENCES college (id)
-    -- (activity_id, phone) 唯一索引已覆盖按活动计数与按活动+手机号查询，无需额外索引
+    -- 两个唯一索引分别覆盖按活动+手机号、按活动+姓名查询与防重
 ) ENGINE = InnoDB COMMENT = '报名表';
 
 -- -------------------------------------------------------------

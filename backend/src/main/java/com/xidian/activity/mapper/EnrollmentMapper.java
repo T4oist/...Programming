@@ -28,6 +28,19 @@ public interface EnrollmentMapper extends BaseMapper<Enrollment> {
     Enrollment selectByActivityAndPhone(@Param("activityId") Long activityId, @Param("phone") String phone);
 
     /**
+     * 重复报名预检：同一活动下「姓名相同」或「手机号相同」均视为重复。
+     * 在锁定活动行之后执行，同一活动的报名已串行化，快照读即可看到已提交记录；
+     * 数据库唯一约束 (activity_id, name) / (activity_id, phone) 作为并发兜底。
+     */
+    @Select("""
+            SELECT COUNT(*) FROM enrollment
+            WHERE activity_id = #{activityId} AND (name = #{name} OR phone = #{phone})
+            """)
+    long countDuplicate(@Param("activityId") Long activityId,
+                        @Param("name") String name,
+                        @Param("phone") String phone);
+
+    /**
      * 当前读统计名额占用（FOR SHARE）：在 FOR UPDATE 锁定活动行之后调用，
      * 保证读到的是已提交的最新报名数，避免 RR 下快照读复用旧 read view 导致超卖。
      */
