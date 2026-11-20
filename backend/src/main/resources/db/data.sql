@@ -5,7 +5,7 @@
 USE activity_system;
 
 INSERT INTO admin (username, password_hash, real_name, phone) VALUES
-('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE6lNH0GmBlvRRuMy', '系统管理员', '13800000000');
+('admin', '$2a$10$3quw00etHWwGIuoCGprceeJMvbC/cx7thNP/4/i1qpWRq8DOXkWxy', '系统管理员', '13800000000');
 
 INSERT INTO college (name, enabled, sort_order) VALUES
 ('通信工程学院', 1, 1),

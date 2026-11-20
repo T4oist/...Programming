@@ -3,6 +3,7 @@ package com.xidian.activity.dto;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
@@ -13,8 +14,10 @@ public class ActivityListQuery {
     private String type;
     /** DRAFT / SIGNUP_OPEN / CLOSED / FINISHED */
     private String status;
-    /** 活动开始时间范围 */
+    /** 活动开始时间范围（前端 Element Plus 使用该格式；不写则 Spring 默认只接受 ISO 的 T 格式） */
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime beginTime;
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endTime;
     private String keyword;
     @Min(value = 1, message = "页码从 1 开始")
