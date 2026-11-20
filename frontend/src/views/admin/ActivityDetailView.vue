@@ -29,10 +29,22 @@
         <el-descriptions-item label="活动简介" :span="2">{{ detail.intro }}</el-descriptions-item>
       </el-descriptions>
 
-      <div v-if="detail.shareUrl" class="share-box">
+      <div v-if="detail.published" class="share-box">
+        <el-alert
+          v-if="isLocalhost"
+          type="warning"
+          :closable="false"
+          show-icon
+          title="当前通过 localhost 访问，分享链接和二维码只能在本机打开；请用电脑局域网 IP 访问本页后再分享。"
+          style="margin-bottom: 8px"
+        />
         <div>宣传页分享链接（报名地址稳定，编辑后不变）：</div>
-        <el-link type="primary" :href="detail.shareUrl" target="_blank" rel="noopener noreferrer">{{ detail.shareUrl }}</el-link>
-        <div style="margin-top: 4px">现场签到页：{{ detail.checkinUrl }}</div>
+        <el-link type="primary" :href="shareLink" target="_blank" rel="noopener noreferrer">{{ shareLink }}</el-link>
+        <div style="margin-top: 4px">
+          报名页直达链接：
+          <el-link type="primary" :href="signupLink" target="_blank" rel="noopener noreferrer">{{ signupLink }}</el-link>
+        </div>
+        <div style="margin-top: 4px">现场签到页：{{ checkinLink }}</div>
       </div>
     </el-card>
 
@@ -70,7 +82,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getActivity, getEnrollments, getStats, publishActivity } from '../../api/modules'
@@ -80,6 +92,13 @@ const detail = reactive({})
 const enrollments = ref([])
 const stats = reactive({})
 const loading = ref(true)
+
+// 链接统一按“当前访问地址”生成：管理员用局域网 IP / 域名打开，分享出去的就是该地址，
+// 不再依赖后端 public-base-url，换 IP、换域名都无需改配置。
+const shareLink = computed(() => `${location.origin}/a/${id}`)
+const signupLink = computed(() => `${location.origin}/a/${id}/signup`)
+const checkinLink = computed(() => `${location.origin}/checkin/${id}`)
+const isLocalhost = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname)
 
 async function load() {
   loading.value = true
