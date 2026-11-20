@@ -13,7 +13,18 @@ const apiProxy = {
 export default defineConfig({
   plugins: [vue()],
   // host: true 监听 0.0.0.0，手机等局域网设备才能通过电脑 IP 访问
-  server: { host: true, port: 5173, proxy: apiProxy },
+  // allowedHosts 允许 Cloudflare 临时隧道域名访问（公网演示用）
+  server: {
+    host: true,
+    port: 5173,
+    allowedHosts: ['.trycloudflare.com'],
+    proxy: apiProxy
+  },
   // npm run preview 同样代理，避免预览时接口 404
-  preview: { host: true, port: 4173, proxy: apiProxy }
+  preview: {
+    host: true,
+    port: 4173,
+    allowedHosts: ['.trycloudflare.com'],
+    proxy: apiProxy
+  }
 })
