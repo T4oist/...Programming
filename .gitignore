@@ -1,0 +1,33 @@
+# 编译产物 / 构建工具
+backend/target/
+frontend/node_modules/
+frontend/dist/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# 日志
+*.log
+logs/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.ipr
+*.iws
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# 本地环境配置（含个人数据库密码／密钥，绝不提交）
+backend/application-local.yml
+backend/src/main/resources/application-local.yml
+**/application-local.yml
+!**/application-local.yml.example
+
+# 临时文件
+*.tmp
+*.bak
+~$*

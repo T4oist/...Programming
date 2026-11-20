@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xidian.activity.mapper.ActivityMapper">
+
+    <resultMap id="ActivityListItemMap" type="com.xidian.activity.dto.ActivityListItem">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="type" column="type"/>
+        <result property="location" column="location"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="signupDeadline" column="signup_deadline"/>
+        <result property="capacity" column="capacity"/>
+        <result property="published" column="published"/>
+        <result property="firstPublishedAt" column="first_published_at"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="enrolledCount" column="enrolled_count"/>
+        <result property="status" column="status"/>
+    </resultMap>
+
+    <!-- 状态由服务器时间实时计算，不在库中冗余存储 -->
+    <sql id="statusExpr">
+        CASE
+            WHEN a.published = 0 THEN 'DRAFT'
+            WHEN NOW() &lt; a.signup_deadline THEN 'SIGNUP_OPEN'
+            WHEN NOW() &lt; a.end_time THEN 'CLOSED'
+            ELSE 'FINISHED'
+        END
+    </sql>
+
+    <select id="selectPageWithStatus" resultMap="ActivityListItemMap">
+        SELECT a.id, a.title, a.type, a.location, a.start_time, a.end_time,
+               a.signup_deadline, a.capacity, a.published, a.first_published_at, a.created_at,
+               (SELECT COUNT(*) FROM enrollment e WHERE e.activity_id = a.id) AS enrolled_count,
+               <include refid="statusExpr"/> AS status
+        FROM activity a
+        WHERE a.deleted = 0
+        <if test="q.type != null and q.type != ''">
+            AND a.type = #{q.type}
+        </if>
+        <if test="q.status != null and q.status != ''">
+            AND <include refid="statusExpr"/> = #{q.status}
+        </if>
+        <if test="q.beginTime != null">
+            AND a.start_time &gt;= #{q.beginTime}
+        </if>
+        <if test="q.endTime != null">
+            AND a.start_time &lt;= #{q.endTime}
+        </if>
+        <if test="q.keyword != null and q.keyword != ''">
+            AND a.title LIKE CONCAT('%', #{q.keyword}, '%')
+        </if>
+        ORDER BY a.created_at DESC
+    </select>
+</mapper>
